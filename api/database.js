@@ -1,21 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Vi bruger de navne, jeg kan se på dit Vercel-screenshot
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
-
-// Vi tilføjer et tjek her. Hvis de er tomme, kaster vi en fejl vi kan se i loggen.
-if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Mangler Supabase URL eller Service Role Key i Environment Variables.");
-}
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
     const { method } = req;
-    const { room } = req.query || req.body;
+    
+    // RETTELSE: Vi tjekker specifikt efter 'room' i både query og body
+    const room = req.query.room || req.body.room;
 
-    if (!room) return res.status(400).json({ error: 'Room code required' });
+    if (!room) {
+        return res.status(400).json({ error: 'Room code required (missing in query and body)' });
+    }
 
     try {
         if (method === 'GET') {
@@ -31,6 +28,10 @@ export default async function handler(req, res) {
 
         if (method === 'POST') {
             const { data } = req.body;
+            
+            // Vi sikrer os, at vi faktisk har fået noget data at gemme
+            if (!data) return res.status(400).json({ error: 'No data provided to save' });
+
             const { error } = await supabase
                 .from('rooms')
                 .upsert({ id: room, data: data, updated_at: new Date() });
@@ -39,7 +40,6 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
         }
     } catch (error) {
-        // Dette sender den faktiske fejlbesked tilbage til din konsol
         return res.status(500).json({ error: error.message });
     }
 
