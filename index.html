@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padel Tournament Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .card { @apply bg-white/90 backdrop-blur-lg p-8 rounded-3xl shadow-2xl transition-all duration-300 hover:shadow-3xl; }
+        .input-score { @apply w-14 h-14 text-2xl text-center border-2 border-gray-300 rounded-full focus:border-blue-500 focus:ring-2 focus:ring-blue-300 outline-none transition-all font-bold text-gray-800; }
+        .btn-primary { @apply w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 rounded-full hover:from-purple-700 hover:to-blue-700 shadow-lg transform hover:-translate-y-1 transition-all; }
+        .btn-secondary { @apply text-sm font-semibold text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-full transition border border-blue-200; }
+        .btn-danger { @apply text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-full transition border border-red-200; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 min-h-screen text-slate-100 antialiased selection:bg-purple-300 selection:text-purple-900">
+
+    <div class="max-w-6xl mx-auto p-6 md:p-12 space-y-12">
+        <!-- Header -->
+        <header class="text-center py-8">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-white to-purple-300 drop-shadow-lg tracking-tight mb-4">
+                Padel Tournament Tracker
+            </h1>
+            <p class="text-blue-300/80 font-medium text-lg">Track your games, scores, and stats in style!</p>
+            <div class="mt-6 flex justify-center items-center gap-4">
+                <input id="room-code-input" type="text" placeholder="Enter Room Code" class="w-64 p-3 rounded-full text-gray-800 text-center focus:ring-2 focus:ring-blue-300 outline-none">
+                <button id="join-room-btn" class="btn-primary w-auto px-6">
+                    Join Room
+                </button>
+            </div>
+        </header>
+
+        <!-- Leaderboard Section -->
+        <section id="leaderboard" class="card border-t-4 border-yellow-400">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🏆</span>
+                    <h2 class="text-2xl font-bold text-slate-800">Leaderboard</h2>
+                </div>
+                <button id="test-fill-btn" class="btn-secondary">
+                    ⚡ Simulate Scores
+                </button>
+            </div>
+            <div class="overflow-hidden rounded-2xl border border-gray-200">
+                <table class="min-w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 uppercase text-xs tracking-wider">
+                            <th class="p-4 font-semibold">Player</th>
+                            <th class="p-4 text-center font-semibold text-red-500">Rounds Lost</th>
+                            <th class="p-4 text-center font-semibold text-orange-500">Faults</th>
+                            <th class="p-4 text-center font-semibold">W / L</th>
+                            <th class="p-4 text-center font-semibold">Games</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body" class="divide-y divide-gray-200 bg-white">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Active Round Section -->
+        <section id="active-round" class="card border-t-4 border-blue-500">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🎾</span>
+                    <h2 class="text-2xl font-bold text-slate-800">Active Round</h2>
+                </div>
+                <button id="reset-round-btn" class="btn-danger hidden">Reset</button>
+            </div>
+            
+            <div id="match-list" class="space-y-4 mb-8">
+                <!-- Matches injected here -->
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-6 mb-6 border border-slate-200">
+                <h3 class="font-bold text-slate-700 text-lg uppercase tracking-wide mb-4 flex items-center gap-3">
+                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Double Faults
+                </h3>
+                <div id="faults-inputs" class="grid grid-cols-2 gap-4">
+                    <!-- Fault inputs injected here -->
+                </div>
+            </div>
+
+            <button id="finish-round-btn" class="btn-primary">
+                Complete Round
+            </button>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="card border-t-4 border-purple-500">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-3">
+                <span>📜</span> Match History
+            </h2>
+            <div id="history-list" class="space-y-6">
+                <!-- History items injected here -->
+                <p class="text-slate-400 text-center py-8 text-sm">No matches played yet.</p>
+            </div>
+            <div class="mt-8 pt-6 border-t border-slate-200 text-right">
+                <button id="nuke-data-btn" class="btn-danger">
+                    ⚠ Clear All Data
+                </button>
+            </div>
+        </section>
+        
+        <footer class="text-center text-slate-500 text-sm py-6">
+            © 2023 Padel Tournament Tracker. All rights reserved.
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
