@@ -87,15 +87,19 @@ function getPlayerStats() {
 }
 
 function calculateRoundLoser(matches) {
-    const res = PLAYERS.map((_, i) => ({ index: i, wins: 0, games: 0 }));
+    const res = PLAYERS.map((_, i) => ({ index: i, wins: 0, games: 0, faults: appState.currentRound.faults[i] || 0 }));
     matches.forEach(m => {
         const s1 = parseInt(m.score1) || 0;
         const s2 = parseInt(m.score2) || 0;
-        m.t1.forEach(p => { res[p].games += s1; if(s1 > s2) res[p].wins++; });
-        m.t2.forEach(p => { res[p].games += s2; if(s2 > s1) res[p].wins++; });
+        m.t1.forEach(p => { res[p].games += s1; if (s1 > s2) res[p].wins++; });
+        m.t2.forEach(p => { res[p].games += s2; if (s2 > s1) res[p].wins++; });
     });
-    // Tie-breaker: Færrest sejre -> Færrest partier
-    res.sort((a, b) => a.wins !== b.wins ? a.wins - b.wins : a.games - b.games);
+    // Tie-breaker: Færrest sejre -> Færrest partier -> Flest dobbeltfejl
+    res.sort((a, b) => 
+        a.wins !== b.wins ? a.wins - b.wins : 
+        a.games !== b.games ? a.games - b.games : 
+        b.faults - a.faults
+    );
     return { name: PLAYERS[res[0].index] };
 }
 
@@ -108,8 +112,8 @@ function renderLeaderboard() {
             <td class="p-4 font-bold text-slate-700">${p.name}</td>
             <td class="p-4 text-center text-red-500 font-bold">${p.roundsLost}</td>
             <td class="p-4 text-center text-orange-500 font-medium">${p.faults}</td>
-            <td class="p-4 text-center">${p.wins} / ${p.losses}</td>
-            <td class="p-4 text-center font-mono">${p.gamesWon}</td>
+            <td class="p-4 text-center leaderboard-cell">${p.wins} / ${p.losses}</td>
+            <td class="p-4 text-center leaderboard-cell">${p.gamesWon}</td>
         </tr>
     `).join('');
 }
@@ -149,10 +153,37 @@ function renderHistory() {
                 <span class="text-xs text-slate-400">${new Date(round.date).toLocaleString()}</span>
                 <span class="bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded-full font-bold uppercase">Taber: ${round.loserName}</span>
             </div>
-            <div class="grid grid-cols-3 gap-2 text-[10px]">
-                ${round.matches.map(m => `
-                    <div class="bg-white p-1 rounded border border-gray-100 text-center">
-                        <div class="font-bold text-slate-700">${m.score1} - ${m.score2}</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                ${round.matches.map((m, i) => `
+                    <div class="bg-white p-2 rounded border border-gray-100 flex flex-col items-center shadow-sm">
+                        <div class="font-semibold text-slate-600 mb-1 text-center">
+                            <span class="text-blue-700">${PLAYERS[m.t1[0]]}</span> & 
+                            <span class="text-blue-700">${PLAYERS[m.t1[1]]}</span>
+                            <span class="text-gray-400">vs</span>
+                            <span class="text-purple-700">${PLAYERS[m.t2[0]]}</span> & 
+                            <span class="text-purple-700">${PLAYERS[m.t2[1]]}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input 
+                                type="number" 
+                                min="0" max="99"
+                                value="${m.score1}" 
+                                class="history-score-input w-10 h-8 text-center border-2 border-blue-200 rounded font-bold text-blue-700 focus:border-blue-500 outline-none transition"
+                                data-round-id="${round.id}" 
+                                data-match-index="${i}" 
+                                data-team="1"
+                            >
+                            <span class="text-gray-400 font-bold">-</span>
+                            <input 
+                                type="number" 
+                                min="0" max="99"
+                                value="${m.score2}" 
+                                class="history-score-input w-10 h-8 text-center border-2 border-purple-200 rounded font-bold text-purple-700 focus:border-purple-500 outline-none transition"
+                                data-round-id="${round.id}" 
+                                data-match-index="${i}" 
+                                data-team="2"
+                            >
+                        </div>
                     </div>
                 `).join('')}
             </div>
@@ -181,6 +212,13 @@ document.body.addEventListener('input', (e) => {
     if (e.target.classList.contains('fault-input')) {
         appState.currentRound.faults[e.target.dataset.player] = e.target.value;
         saveState();
+    }
+    if (e.target.classList.contains('history-score-input')) {
+        const roundId = e.target.dataset.roundId;
+        const matchIndex = parseInt(e.target.dataset.matchIndex, 10);
+        const team = e.target.dataset.team;
+        const value = parseInt(e.target.value, 10) || 0;
+        updateMatch(roundId, matchIndex, team === "1" ? { score1: value } : { score2: value });
     }
 });
 
@@ -214,6 +252,40 @@ document.getElementById('nuke-data-btn').addEventListener('click', () => {
     if(confirm("SLET ALT DATA?")) {
         appState.history = [];
         saveState();
+    }
+});
+
+// --- Update Match ---
+async function updateMatch(roundId, matchIndex, updatedMatch) {
+    try {
+        const response = await fetch(`${API_BASE_URL}?room=${roomCode}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room: roomCode, roundId, matchIndex, updatedMatch })
+        });
+
+        if (response.ok) {
+            await fetchRoomData(); // Hent opdateret data
+        } else {
+            const error = await response.json();
+            alert(`Error updating match: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error updating match:', error);
+    }
+}
+
+document.body.addEventListener('click', (e) => {
+    if (e.target.classList.contains('edit-match-btn')) {
+        const roundId = e.target.dataset.roundId;
+        const matchIndex = e.target.dataset.matchIndex;
+
+        const newScore1 = prompt('Enter new score for Team 1:');
+        const newScore2 = prompt('Enter new score for Team 2:');
+
+        if (newScore1 !== null && newScore2 !== null) {
+            updateMatch(roundId, matchIndex, { score1: parseInt(newScore1), score2: parseInt(newScore2) });
+        }
     }
 });
 
