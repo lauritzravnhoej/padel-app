@@ -7,15 +7,97 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .card { @apply bg-white/90 backdrop-blur-lg p-8 rounded-3xl shadow-2xl transition-all duration-300 hover:shadow-3xl; }
-        .input-score { @apply w-14 h-14 text-2xl text-center border-2 border-gray-300 rounded-full focus:border-blue-500 focus:ring-2 focus:ring-blue-300 outline-none transition-all font-bold text-gray-800; }
-        .btn-primary { @apply w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-4 rounded-full hover:from-purple-700 hover:to-blue-700 shadow-lg transform hover:-translate-y-1 transition-all; }
-        .btn-secondary { @apply text-sm font-semibold text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-full transition border border-blue-200; }
-        .btn-danger { @apply text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-full transition border border-red-200; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #FF6F61, #FFD700, #4CAF50, #2196F3, #9C27B0);
+            background-size: 300% 300%;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-score {
+            width: 3.5rem;
+            height: 3.5rem;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            outline: none;
+            transition: all 0.3s;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .input-score:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.125rem #93c5fd;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #FF6F61, #FFD700);
+            color: white;
+            font-weight: bold;
+            padding: 1rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #FF4500, #FFA500);
+            transform: translateY(-0.25rem);
+        }
+
+        .btn-secondary {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4CAF50;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.3s;
+            border: 1px solid #A5D6A7;
+        }
+
+        .btn-secondary:hover {
+            color: #388E3C;
+            background-color: #C8E6C9;
+        }
+
+        .btn-danger {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #E91E63;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.3s;
+            border: 1px solid #F8BBD0;
+        }
+
+        .btn-danger:hover {
+            color: #C2185B;
+            background-color: #FCE4EC;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 min-h-screen text-slate-100 antialiased selection:bg-purple-300 selection:text-purple-900">
+<body class="min-h-screen text-slate-100 antialiased selection:bg-purple-300 selection:text-purple-900">
 
     <div class="max-w-6xl mx-auto p-6 md:p-12 space-y-12">
         <!-- Header -->
