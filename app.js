@@ -25,8 +25,18 @@ async function fetchRoomData() {
             const data = await response.json();
             if (data) {
                 appState = data;
-                render();
+            } else {
+                // Nyt rum - vi nulstiller appState til standard
+                appState = {
+                    history: [],
+                    currentRound: {
+                        matches: MATCH_SCHEDULE.map(m => ({ ...m, score1: 0, score2: 0 })),
+                        faults: [0, 0, 0, 0]
+                    }
+                };
             }
+            // render() SKAL kaldes herude, så siden tegnes uanset hvad
+            render();
         }
     } catch (error) {
         console.error('Fejl ved hentning:', error);

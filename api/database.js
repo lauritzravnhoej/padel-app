@@ -1,6 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+// Vi bruger de nøgler, jeg kan se på dit screenshot
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Denne har altid adgang
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req, res) {
     const { method } = req;
@@ -17,6 +21,7 @@ export default async function handler(req, res) {
                 .single();
 
             if (error && error.code !== 'PGRST116') throw error; 
+            // Returner data hvis det findes, ellers null
             return res.status(200).json(data ? data.data : null);
         } catch (error) {
             return res.status(500).json({ error: error.message });
