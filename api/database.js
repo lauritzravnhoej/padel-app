@@ -62,7 +62,7 @@ export default async function handler(req, res) {
             const appState = data.data;
 
             // Find runden og opdater match
-            const round = appState.history.find(r => r.id === roundId);
+            const round = appState.history.find(r => String(r.id) === String(roundId));
             if (!round) {
                 return res.status(404).json({ error: 'Round not found' });
             }

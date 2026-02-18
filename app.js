@@ -147,7 +147,9 @@ function renderHistory() {
         list.innerHTML = '<p class="text-slate-400 text-center py-4">Ingen runder endnu.</p>';
         return;
     }
-    list.innerHTML = [...appState.history].reverse().map(round => `
+    // Brug den originale rækkefølge, men vis nyeste øverst
+    const history = appState.history.slice().reverse();
+    list.innerHTML = history.map(round => `
         <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-xs text-slate-400">${new Date(round.date).toLocaleString()}</span>
