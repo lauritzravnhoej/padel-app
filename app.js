@@ -72,12 +72,14 @@ function getPlayerStats() {
             const s1 = parseInt(m.score1) || 0;
             const s2 = parseInt(m.score2) || 0;
             m.t1.forEach(p => { 
-                stats[p].gamesWon += s1;
-                if (s1 > s2) stats[p].wins++; else if (s2 > s1) stats[p].losses++;
+                stats[p].gamesWon += s1; // Tilføj point til spilleren
+                stats[p].wins += s1 > s2 ? 1 : 0; // Opdater vundne kampe
+                stats[p].losses += s1 < s2 ? 1 : 0; // Opdater tabte kampe
             });
             m.t2.forEach(p => { 
-                stats[p].gamesWon += s2;
-                if (s2 > s1) stats[p].wins++; else if (s1 > s2) stats[p].losses++;
+                stats[p].gamesWon += s2; // Tilføj point til spilleren
+                stats[p].wins += s2 > s1 ? 1 : 0; // Opdater vundne kampe
+                stats[p].losses += s2 < s1 ? 1 : 0; // Opdater tabte kampe
             });
         });
     });
