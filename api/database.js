@@ -73,6 +73,24 @@ export default async function handler(req, res) {
 
             round.matches[matchIndex] = { ...round.matches[matchIndex], ...updatedMatch };
 
+            // --- GENBEREGN TABEREN FOR RUNDEN ---
+            // Brug samme logik som i frontend
+            const PLAYERS = ["Lau", "Hein", "Lopper", "Hoppe"];
+            const res = PLAYERS.map((_, i) => ({ index: i, wins: 0, games: 0, faults: round.faults ? (parseInt(round.faults[i]) || 0) : 0 }));
+            round.matches.forEach(m => {
+                const s1 = parseInt(m.score1) || 0;
+                const s2 = parseInt(m.score2) || 0;
+                m.t1.forEach(p => { res[p].games += s1; if (s1 > s2) res[p].wins++; });
+                m.t2.forEach(p => { res[p].games += s2; if (s2 > s1) res[p].wins++; });
+            });
+            res.sort((a, b) =>
+                a.wins !== b.wins ? a.wins - b.wins :
+                a.games !== b.games ? a.games - b.games :
+                b.faults - a.faults
+            );
+            round.loserName = PLAYERS[res[0].index];
+            // --- SLUT GENBEREGNING ---
+
             // Gem den opdaterede appState
             const { error: updateError } = await supabase
                 .from('rooms')
